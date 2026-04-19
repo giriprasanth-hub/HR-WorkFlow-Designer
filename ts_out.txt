@@ -1,0 +1,33 @@
+﻿src/api/simulate.ts(1,10): error TS1484: 'WorkflowGraph' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/App.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/canvas/WorkflowCanvas.tsx(59,13): error TS2345: Argument of type '{ id: string; type: NodeType; position: { x: number; y: number; }; data: { title: string; type: NodeType; metadata: never[]; } | { title: string; type: NodeType; description: string; assignee: string; dueDate: string; customFields: never[]; } | { ...; } | { ...; } | { ...; }; }' is not assignable to parameter of type 'WorkflowNode'.
+  Types of property 'data' are incompatible.
+    Type '{ title: string; type: NodeType; metadata: never[]; } | { title: string; type: NodeType; description: string; assignee: string; dueDate: string; customFields: never[]; } | { title: string; type: NodeType; approverRole: string; } | { ...; } | { ...; }' is not assignable to type 'ExtendedNodeData'.
+      Type '{ title: string; type: NodeType; metadata: never[]; }' is not assignable to type 'ExtendedNodeData'.
+        Type '{ title: string; type: NodeType; metadata: never[]; }' is missing the following properties from type 'EndNodeData': endMessage, isSummary
+src/components/forms/NodeFormPanel.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/components/forms/NodeFormPanel.tsx(2,19): error TS6133: 'useFieldArray' is declared but its value is never read.
+src/components/forms/NodeFormPanel.tsx(25,23): error TS6133: 'handleSubmit' is declared but its value is never read.
+src/components/forms/NodeFormPanel.tsx(25,37): error TS6133: 'control' is declared but its value is never read.
+src/components/forms/schemas.ts(25,13): error TS2554: Expected 2-3 arguments, but got 1.
+src/components/nodes/Nodes.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/nodes/Nodes.tsx(3,10): error TS1484: 'ExtendedNodeData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/sandbox/TestPanel.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/main.tsx(8,7): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+src/store/workflowStore.ts(3,3): error TS1484: 'Connection' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/store/workflowStore.ts(4,3): error TS1484: 'Edge' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/store/workflowStore.ts(5,3): error TS1484: 'EdgeChange' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/store/workflowStore.ts(6,3): error TS1484: 'Node' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/store/workflowStore.ts(7,3): error TS1484: 'NodeChange' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/store/workflowStore.ts(12,10): error TS1484: 'ExtendedNodeData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/store/workflowStore.ts(57,7): error TS2322: Type '{ data: { [x: string]: any; type: NodeType.START; metadata: { key: string; value: string; }[]; title: string; } | { [x: string]: any; type: NodeType.START | NodeType.TASK; description?: string | undefined; ... 4 more ...; metadata: { ...; }[]; } | ... 22 more ... | { ...; }; ... 26 more ...; [internalsSymbol]?: { .....' is not assignable to type 'WorkflowNode[]'.
+  Type '{ data: { [x: string]: any; type: NodeType.START; metadata: Array<{ key: string; value: string; }>; title: string; } | { [x: string]: any; type: NodeType.START | NodeType.TASK; ... 5 more ...; metadata: Array<{ key: string; value: string; }>; } | ... 22 more ... | { ...; }; ... 26 more ...; [internalsSymbol]?: { z?:...' is not assignable to type 'WorkflowNode'.
+    Types of property 'data' are incompatible.
+      Type '{ [x: string]: any; type: NodeType.START; metadata: { key: string; value: string; }[]; title: string; } | { [x: string]: any; type: NodeType.START | NodeType.TASK; description?: string | undefined; ... 4 more ...; metadata: { ...; }[]; } | ... 22 more ... | { ...; }' is not assignable to type 'ExtendedNodeData'.
+        Type '{ [x: string]: any; type: NodeType.START | NodeType.TASK; description?: string | undefined; assignee?: string | undefined; dueDate?: string | undefined; customFields?: Array<{ key: string; value: string; }> | undefined; title: string; metadata: Array<{ key: string; value: string; }>; }' is not assignable to type 'ExtendedNodeData'.
+          Type '{ [x: string]: any; type: NodeType.START | NodeType.TASK; description?: string | undefined; assignee?: string | undefined; dueDate?: string | undefined; customFields?: Array<{ key: string; value: string; }> | undefined; title: string; metadata: Array<{ key: string; value: string; }>; }' is not assignable to type 'StartNodeData | TaskNodeData'.
+            Type '{ [x: string]: any; type: NodeType.START | NodeType.TASK; description?: string | undefined; assignee?: string | undefined; dueDate?: string | undefined; customFields?: Array<{ key: string; value: string; }> | undefined; title: string; metadata: Array<{ key: string; value: string; }>; }' is not assignable to type 'TaskNodeData'.
+              Types of property 'type' are incompatible.
+                Type 'NodeType.START | NodeType.TASK' is not assignable to type 'NodeType.TASK'.
+                  Type 'NodeType.START' is not assignable to type 'NodeType.TASK'.
+src/types/workflow.types.ts(2,13): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
