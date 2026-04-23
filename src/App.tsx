@@ -1,6 +1,6 @@
 import React from 'react';
-import { WorkflowCanvas } from './components/canvas/WorkflowCanvas';
 import { ReactFlowProvider } from 'reactflow';
+import { WorkflowCanvas } from './components/canvas/WorkflowCanvas';
 
 function App() {
   return (

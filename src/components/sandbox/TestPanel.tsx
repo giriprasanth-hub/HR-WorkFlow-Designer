@@ -1,69 +1,244 @@
 import React, { useState } from 'react';
+import { Play, X, AlertTriangle, CheckCircle, Terminal, Clock, RotateCcw } from 'lucide-react';
+import { useWorkflowValidation } from '../../hooks/useWorkflowValidation';
+import { useSimulate } from '../../hooks/useSimulate';
 import { useWorkflowStore } from '../../store/workflowStore';
-import { Play } from 'lucide-react';
+
+const StatusDot = ({ status }: { status: string }) => {
+  const colors: Record<string, string> = {
+    SUCCESS: '#10b981',
+    FAILED: '#ef4444',
+    PENDING: '#f59e0b',
+    SKIPPED: '#94a3b8',
+  };
+  return (
+    <div
+      style={{
+        width: 10,
+        height: 10,
+        borderRadius: '50%',
+        background: colors[status] || '#94a3b8',
+        flexShrink: 0,
+      }}
+    />
+  );
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const config: Record<string, { bg: string; color: string }> = {
+    SUCCESS: { bg: '#dcfce7', color: '#166534' },
+    FAILED: { bg: '#fee2e2', color: '#991b1b' },
+    PENDING: { bg: '#fef3c7', color: '#92400e' },
+    SKIPPED: { bg: '#f1f5f9', color: '#64748b' },
+  };
+  const c = config[status] || config.SKIPPED;
+  return (
+    <span
+      style={{
+        fontSize: 9,
+        fontWeight: 700,
+        letterSpacing: '0.05em',
+        background: c.bg,
+        color: c.color,
+        padding: '1px 6px',
+        borderRadius: 999,
+        textTransform: 'uppercase' as const,
+      }}
+    >
+      {status}
+    </span>
+  );
+};
 
 export const SandboxPanel = () => {
-  const { nodes, edges } = useWorkflowStore();
-  const [logs, setLogs] = useState<any[]>([]);
+  const { nodes } = useWorkflowStore();
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { errors, hasErrors } = useWorkflowValidation();
+  const { logs, isLoading, hasRun, runSimulation, reset } = useSimulate();
 
-  const simulate = async () => {
-    setIsLoading(true);
+  const handleRun = async () => {
     setIsOpen(true);
-    try {
-      const payload = { nodes: nodes.map(n => n.data), edges };
-      const response = await fetch('/api/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      setLogs(data.logs);
-    } catch (e) {
-      console.error(e);
-      setLogs([{ stepId: 'error', status: 'FAILED', log: 'Simulation Request Failed' }]);
-    }
-    setIsLoading(false);
+    reset();
+    await runSimulation();
   };
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+  const canRun = nodes.length > 0 && !isLoading;
 
   return (
     <>
-      <button 
-        onClick={simulate}
-        disabled={isLoading || nodes.length === 0}
-        className="absolute bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 flex gap-2 items-center rounded-full shadow-lg z-10 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+      {/* Floating run button */}
+      <button
+        className="run-btn"
+        onClick={handleRun}
+        disabled={!canRun}
+        title={nodes.length === 0 ? 'Add nodes first' : 'Run workflow simulation'}
       >
-        <Play className="w-4 h-4 fill-current" />
-        <span className="font-semibold text-sm">Test Workflow</span>
+        {isLoading ? (
+          <span className="loading-spinner" style={{ width: 14, height: 14 }} />
+        ) : (
+          <Play size={14} fill="currentColor" />
+        )}
+        <span>{isLoading ? 'Running...' : 'Test Workflow'}</span>
       </button>
 
+      {/* Execution log panel */}
       {isOpen && (
-        <div className="absolute bottom-20 right-6 w-96 bg-white border border-slate-200 shadow-2xl rounded-lg p-0 z-30 flex flex-col h-[400px]">
-          <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-lg">
-            <h3 className="font-bold text-slate-800">Execution Log</h3>
-            <button onClick={() => setIsOpen(false)} className="text-xs text-indigo-600 hover:underline">Close</button>
+        <div className="sandbox-panel">
+          {/* Header */}
+          <div className="sandbox-panel__header">
+            <div className="sandbox-panel__title">
+              <Terminal size={14} />
+              Execution Log
+            </div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              {hasRun && !isLoading && (
+                <button
+                  onClick={handleRun}
+                  style={{
+                    background: 'rgba(255,255,255,0.12)',
+                    border: 'none',
+                    borderRadius: 6,
+                    padding: '4px 8px',
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: 11,
+                    fontFamily: 'Inter, sans-serif',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <RotateCcw size={10} />
+                  Re-run
+                </button>
+              )}
+              <button className="icon-btn icon-btn-dark" onClick={handleClose}>
+                <X size={14} />
+              </button>
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-            {isLoading && <div className="text-sm text-slate-500 flex justify-center py-4">Running Sandbox...</div>}
-            
-            {!isLoading && logs.length === 0 && (
-              <div className="text-sm text-slate-500 text-center py-4">No logs generated.</div>
+
+          {/* Body */}
+          <div className="sandbox-panel__body">
+            {/* Validation warnings shown before execution */}
+            {errors.length > 0 && (
+              <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {errors.map((err, i) => (
+                  <div
+                    key={i}
+                    className={err.severity === 'error' ? 'validation-badge' : 'validation-badge'}
+                    style={{
+                      background: err.severity === 'error' ? '#fee2e2' : '#fef9c3',
+                      color: err.severity === 'error' ? '#991b1b' : '#713f12',
+                      borderRadius: 8,
+                      padding: '7px 10px',
+                      fontSize: 11,
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 6,
+                    }}
+                  >
+                    <AlertTriangle size={11} style={{ marginTop: 1, flexShrink: 0 }} />
+                    {err.message}
+                  </div>
+                ))}
+              </div>
             )}
 
+            {/* Loading spinner row */}
+            {isLoading && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '12px 0',
+                  color: '#64748b',
+                  fontSize: 13,
+                }}
+              >
+                <span className="loading-spinner" />
+                Simulating workflow...
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!isLoading && hasRun && logs.length === 0 && (
+              <div
+                style={{ textAlign: 'center', padding: '20px 0', color: '#94a3b8', fontSize: 13 }}
+              >
+                No execution steps generated.
+              </div>
+            )}
+
+            {/* Execution steps */}
             {logs.map((item, i) => (
-              <div key={i} className="flex gap-3 text-sm">
-                <div className="flex flex-col items-center">
-                  <div className={`w-3 h-3 rounded-full mt-1 ${item.status === 'SUCCESS' ? 'bg-green-500' : 'bg-red-500'}`} />
-                  {i !== logs.length - 1 && <div className="w-0.5 h-full bg-slate-200 mt-1" />}
+              <div
+                key={i}
+                className="execution-step animate-step-in"
+                style={{ animationDelay: `${i * 60}ms`, opacity: 0 }}
+              >
+                <div className="execution-step__indicator">
+                  <StatusDot status={item.status} />
+                  {i !== logs.length - 1 && (
+                    <div className="execution-step__connector" />
+                  )}
                 </div>
-                <div className="pb-4">
-                  <div className="font-semibold text-slate-700">{item.title}</div>
-                  <div className="text-slate-500 text-xs mt-1">{item.log}</div>
+                <div className="execution-step__content">
+                  <div
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}
+                  >
+                    <span className="execution-step__title">{item.title}</span>
+                    <StatusBadge status={item.status} />
+                  </div>
+                  <div className="execution-step__log">{item.log}</div>
                 </div>
               </div>
             ))}
+
+            {/* Success summary */}
+            {!isLoading && hasRun && logs.length > 0 && logs.every((l) => l.status === 'SUCCESS') && (
+              <div
+                className="success-badge"
+                style={{ marginTop: 8 }}
+              >
+                <CheckCircle size={13} />
+                All {logs.length} steps completed successfully.
+              </div>
+            )}
           </div>
+
+          {/* Footer stats */}
+          {!isLoading && hasRun && logs.length > 0 && (
+            <div
+              style={{
+                padding: '8px 14px',
+                borderTop: '1px solid var(--panel-border)',
+                display: 'flex',
+                gap: 12,
+                fontSize: 11,
+                color: '#94a3b8',
+                flexShrink: 0,
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Clock size={10} />
+                {logs.length} steps
+              </span>
+              <span style={{ color: '#10b981' }}>
+                ✓ {logs.filter((l) => l.status === 'SUCCESS').length} passed
+              </span>
+              {logs.some((l) => l.status === 'FAILED') && (
+                <span style={{ color: '#ef4444' }}>
+                  ✗ {logs.filter((l) => l.status === 'FAILED').length} failed
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
     </>

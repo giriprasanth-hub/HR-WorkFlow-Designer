@@ -24,7 +24,10 @@ export type WorkflowState = {
   onConnect: (connection: Connection) => void;
   addNode: (node: WorkflowNode) => void;
   updateNode: (id: string, data: Partial<ExtendedNodeData>) => void;
+  deleteNode: (id: string) => void;
   setSelectedNode: (id: string | null) => void;
+  importWorkflow: (nodes: WorkflowNode[], edges: Edge[]) => void;
+  clearCanvas: () => void;
 };
 
 export const useWorkflowStore = create<WorkflowState>((set, get) => ({
@@ -46,7 +49,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   onConnect: (connection: Connection) => {
     set({
-      edges: addEdge(connection, get().edges),
+      edges: addEdge({ ...connection, type: 'smoothstep' }, get().edges),
     });
   },
 
@@ -65,7 +68,23 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     });
   },
 
+  deleteNode: (id: string) => {
+    set({
+      nodes: get().nodes.filter((n) => n.id !== id),
+      edges: get().edges.filter((e) => e.source !== id && e.target !== id),
+      selectedNodeId: get().selectedNodeId === id ? null : get().selectedNodeId,
+    });
+  },
+
   setSelectedNode: (id: string | null) => {
     set({ selectedNodeId: id });
+  },
+
+  importWorkflow: (nodes: WorkflowNode[], edges: Edge[]) => {
+    set({ nodes, edges, selectedNodeId: null });
+  },
+
+  clearCanvas: () => {
+    set({ nodes: [], edges: [], selectedNodeId: null });
   },
 }));
